@@ -77,6 +77,8 @@ int countLinearConflicts(vector<vector<int>> &state) {
     for(int i=0;i<k;i++){
         for(int j=0;j<k;j++){
             int val = state[i][j];
+            if(val == 0) continue;
+
             int targetRow = ceil((val+0.0)/(k+0.0));
             if(i+1 == targetRow) v.push_back(val);
         }
@@ -88,8 +90,11 @@ int countLinearConflicts(vector<vector<int>> &state) {
     for(int i=0;i<k;i++){
         for(int j=0;j<k;j++){
             int val = state[j][i];
+            if(val == 0) continue;
+
             int targetCol = val % k;
             if(targetCol == 0) targetCol = k;
+            
             if(j+1 == targetCol) v.push_back(val);
         }
         count = count + countInversionInLine(v);

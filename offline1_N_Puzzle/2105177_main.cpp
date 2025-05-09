@@ -3,10 +3,12 @@
 #include <queue>
 #include <map>
 #include <cmath>
+#include <memory>
 
 using namespace std;
 
 int k;
+int heuristicChoice;
 
 int countLinearConflicts(vector<vector<int>> &state);
 
@@ -37,13 +39,12 @@ double manhattanDistance(vector<vector<int>> &state)
         {
 
             int val = state[i][j];
-            if (val == 0)
-                continue;
+            if (val == 0) continue;
 
             int targetRow = ceil((val + 0.0) / (k + 0.0));
             int targetCol = val % k;
-            if (targetCol == 0)
-                targetCol = k;
+            if (targetCol == 0) targetCol = k;
+
             manhattan = manhattan + abs(targetCol - (j + 1)) + abs(targetRow - (i + 1));
         }
     }
@@ -59,13 +60,11 @@ double euclideanDistance(vector<vector<int>> &state)
         {
 
             int val = state[i][j];
-            if (val == 0)
-                continue;
+            if (val == 0) continue;
 
             int targetRow = ceil((val + 0.0) / (k + 0.0));
             int targetCol = val % k;
-            if (targetCol == 0)
-                targetCol = k;
+            if (targetCol == 0) targetCol = k;
 
             euclidean = euclidean + sqrt(((targetRow - (i + 1)) * (targetRow - (i + 1))) + ((targetCol - (j + 1)) * (targetCol - (j + 1))));
         }
@@ -80,9 +79,18 @@ double linearConflictDistance(vector<vector<int>> &state)
 
 double getHeuristicValue(vector<vector<int>> &state)
 {
-    return linearConflictDistance(state);
+    if(heuristicChoice == 1){
+        return hammingDistance(state);
+    }else if(heuristicChoice == 2){
+        return manhattanDistance(state);
+    }else if(heuristicChoice == 3){
+        return euclideanDistance(state);
+    }else if(heuristicChoice == 4){
+        return linearConflictDistance(state);
+    }else{
+        return hammingDistance(state);
+    }
 }
-
 
 
 ////////////////////////////////////////////////// util - classes and structs
@@ -92,7 +100,8 @@ class Node
 public:
     vector<vector<int>> board;
     int movesCount;
-    Node *parent;
+    // Node * parent;
+    shared_ptr<Node> parent;
 
     Node()
     {
@@ -112,9 +121,12 @@ struct CompareNode
     {
         vector<vector<int>> vectorA = a.board;
         vector<vector<int>> vectorB = b.board;
+
         double costA = a.movesCount + getHeuristicValue(vectorA);
         double costB = b.movesCount + getHeuristicValue(vectorB);
-        return costA > costB;
+
+        if(costA != costB ) return costA > costB;
+        return getHeuristicValue(vectorA) > getHeuristicValue(vectorB);
     }
 };
 
@@ -130,8 +142,7 @@ int countInversionInLine(vector<int> arr) // returns number of inversions in a l
     {
         for (int j = i + 1; j < n; j++)
         {
-            if (arr[i] > arr[j])
-            {
+            if (arr[i] > arr[j]){
                 inversionCount++;
             }
         }
@@ -167,9 +178,12 @@ int countLinearConflicts(vector<vector<int>> &state) // returns number of linear
         for (int j = 0; j < k; j++)
         {
             int val = state[i][j];
+            if(val == 0) continue;
+
             int targetRow = ceil((val + 0.0) / (k + 0.0));
-            if (i + 1 == targetRow)
+            if (i + 1 == targetRow){
                 v.push_back(val);
+            }
         }
         count = count + countInversionInLine(v);
         v.clear();
@@ -181,11 +195,16 @@ int countLinearConflicts(vector<vector<int>> &state) // returns number of linear
         for (int j = 0; j < k; j++)
         {
             int val = state[j][i];
+            if(val == 0) continue;
+
             int targetCol = val % k;
-            if (targetCol == 0)
+            if (targetCol == 0){
                 targetCol = k;
-            if (j + 1 == targetCol)
+            }
+
+            if (j + 1 == targetCol){
                 v.push_back(val);
+            }
         }
         count = count + countInversionInLine(v);
         v.clear();
@@ -278,19 +297,16 @@ bool isSolvable(vector<vector<int>> &board)
     {
         for (int j = 0; j < k; j++)
         {
-            if (board[i][j] == 0)
-            {
+            if (board[i][j] == 0){
                 blankPos = k - i;
                 break;
             }
         }
 
-        if (blankPos)
-            break;
+        if (blankPos) break;
     }
 
-    if ((k % 2 == 0) && (inversionCount % 2 != blankPos % 2))
-    {
+    if ((k % 2 == 0) && (inversionCount % 2 != blankPos % 2)){
         return true;
     }
 
@@ -306,12 +322,10 @@ void solve(vector<vector<int>> &board)
     {
         for (int j = 0; j < k; j++)
         {
-            if (val == k * k)
-            {
+            if (val == k * k){
                 target[i][j] = 0;
             }
-            else
-            {
+            else{
                 target[i][j] = val++;
             }
         }
@@ -330,19 +344,22 @@ void solve(vector<vector<int>> &board)
     visited[initial] = 1;
     exploredCount++;
 
+    long long int testCount = 1;
+
     while (!q.empty())
     {
         Node current = q.top();
         q.pop();
 
-        if (current.board == target)
-        {
+        // cout<<" Testing node no. " << testCount++ << endl;
+
+        if (current.board == target){
+            // cout << "got the answer "<<endl;
             vector<Node> path;
             while (&current != NULL)
             {
                 path.push_back(current);
-                if (current.parent == NULL)
-                    break;
+                if (current.parent == NULL) break;
                 current = *(current.parent);
             }
 
@@ -350,7 +367,6 @@ void solve(vector<vector<int>> &board)
             for (int i = path.size() - 1; i >= 0; i--)
             {
                 cout << "Move no. " << path[i].movesCount << endl;
-
                 printBoard(path[i].board);
             }
 
@@ -363,11 +379,13 @@ void solve(vector<vector<int>> &board)
         vector<Node> children = generateChildren(current.board);
         for (Node &child : children)
         {
-            if (visited[child] != 1)
-            {
+            if (visited[child] != 1){
 
                 child.movesCount = current.movesCount + 1;
-                child.parent = new Node(current);
+
+                //child.parent = new Node(current);
+                child.parent = make_shared<Node>(current);
+
                 q.push(child);
                 visited[child] = 1;
                 exploredCount++;
@@ -379,13 +397,38 @@ void solve(vector<vector<int>> &board)
     cout << "No solution found.\n";
 }
 
-int main()
+int main(int argc , char * argv[]) 
 {
-    cout << "Puzzle size : ";
-    cin >> k;
+    if(argc == 2){
+        heuristicChoice = atoi(argv[1]);
+    }else{
+        heuristicChoice = 1;
+    }
 
+    switch (heuristicChoice)
+    {
+    case 1:
+        cout << "Using ' Hamming Distance ' as Heuristic Function "<<endl;
+        break;
+    case 2:
+        cout << "Using ' Manhattan Distance ' as Heuristic Function "<<endl;
+        break;
+    case 3:
+        cout << "Using ' Euclidean Distance ' as Heuristic Function "<<endl;
+        break;
+    case 4:
+        cout << "Using ' Linear Conflict ' as Heuristic Function "<<endl;
+        break;
+    default:
+        cout << "No heuristic function choosen "<<endl;
+        break;
+    }
+    cout << endl;
+
+
+    cout << "Enter Puzzle size and initial board configuartion " << endl;
+    cin >> k;
     vector<vector<int>> board(k, vector<int>(k));
-    cout << "Initial board configuration " << endl;
     for (int i = 0; i < k; i++)
     {
         for (int j = 0; j < k; j++)
@@ -393,15 +436,17 @@ int main()
             cin >> board[i][j];
         }
     }
+    cout << endl << endl;
 
-    cout << endl
-         << endl;
+    // cout << "Trying to know if solvable "<<endl;
 
     if (!isSolvable(board))
     {
         cout << "Unsolvable puzzle." << endl;
         return 0;
     }
+
+    // cout << "solvable , trying to solve "<<endl;
 
     solve(board);
 
