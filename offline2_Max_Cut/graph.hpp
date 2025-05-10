@@ -36,6 +36,21 @@ struct Graph{
         this->weights[a][b] = w;
         this->weights[b][a] = w;
     }
+
+
+    friend ostream& operator<<(ostream& os, const Graph& g) {
+        os << "Graph: " << g.number_of_vertices << " vertices, " << g.number_of_edges << " edges" << endl;
+        for (int i = 0; i < g.number_of_vertices; i++) {
+            os << i + 1 << ": ";
+            for (int j = 0; j < g.number_of_vertices; j++) {
+                if (g.weights[i][j] != 0) {
+                    os << j + 1 << "(" << g.weights[i][j] << ") ";
+                }
+            }
+            os << endl;
+        }
+        return os;
+    }
 };
 
 

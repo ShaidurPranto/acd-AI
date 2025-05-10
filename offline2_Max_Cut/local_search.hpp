@@ -22,7 +22,10 @@ struct custom_compare{
     }
 };
 
-CutForLocalSearch local_search(Graph g, Cut cut){
+CutForLocalSearch local_search(Graph& g, Cut& cut){
+    // debug
+    cout << "Starting local search" << endl;
+
     priority_queue<TempNode, vector<TempNode>, custom_compare> pq;
     int number_of_iterations = 0;
 
@@ -52,6 +55,9 @@ CutForLocalSearch local_search(Graph g, Cut cut){
         }else{
             number_of_iterations++;
 
+            // debug
+            // cout << "Group changed "<<number_of_iterations << " times" << endl;
+
             if(is_member_of(node.vertex, cut.x)){
                 cut.x = remove_vertex_from_group(node.vertex, cut.x);
                 cut.y.push_back(node.vertex);
@@ -65,6 +71,9 @@ CutForLocalSearch local_search(Graph g, Cut cut){
 
     // debug
     // cout << "Number of iterations: " << number_of_iterations << endl;
+
+    // debug
+    cout << "Ending local search" << endl;
     
     return CutForLocalSearch(cut, number_of_iterations);
 }

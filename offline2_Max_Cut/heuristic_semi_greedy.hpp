@@ -11,10 +11,12 @@
 using namespace std;
 
 
-Cut construct_semi_greedy(Graph g){
-    Edge maxEdge = get_max_weight_edge(g);
+Cut construct_semi_greedy(Graph& g){
     // debug
-    // cout << "Max edge: " << maxEdge.vertex_a + 1 << " , " << maxEdge.vertex_b + 1 << " with weight: " << maxEdge.weight << endl;
+    cout << "starting semi greedy construction" << endl;
+
+    Edge maxEdge = get_max_weight_edge(g);
+
     Cut cut;
     cut.x.push_back(maxEdge.vertex_a);
     cut.y.push_back(maxEdge.vertex_b);
@@ -29,7 +31,7 @@ Cut construct_semi_greedy(Graph g){
 
     int n = g.weights.size();
 
-    double alpha = 0.5;
+    double alpha = (rand() % 100 / 100.0);
 
     while(cut.x.size() + cut.y.size() < n){
         function_values.clear();
@@ -55,7 +57,7 @@ Cut construct_semi_greedy(Graph g){
                     minimum = min(sigma_x, sigma_y);
                 }
 
-                function_values[i] = max(sigma_x, sigma_y) - minimum;
+                function_values[i] = max(sigma_x, sigma_y);
                 weight_x[i] = sigma_x;
                 weight_y[i] = sigma_y;
 
@@ -76,17 +78,9 @@ Cut construct_semi_greedy(Graph g){
             }
         }
 
-        // adjust alpha if needed
-        if(rcl.size() == 0){
-            alpha -= 0.1;
-            continue;
-        }else{
-            alpha = 0.5;
-        }
-
         // debug
         // cout << "RCL building done" << endl;
-
+        
         // select vertex from rcl
         int selected_vertex = rcl[random() % rcl.size()];
 
@@ -99,9 +93,12 @@ Cut construct_semi_greedy(Graph g){
 
         taken[selected_vertex] = true;
 
-        // debug
+        //debug
         // cout << "total vertices in cut: " << cut.x.size() + cut.y.size() << endl;
     }
+
+    // debug
+    cout << "Ending semi greedy construction" << endl;
 
     return cut;
 }

@@ -11,7 +11,7 @@
 using namespace std;
 
 
-Cut construct_random(Graph g){
+Cut construct_random(Graph& g){
     return Cut();
 }
 

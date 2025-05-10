@@ -11,7 +11,7 @@
 using namespace std;
 
 
-Cut construct_greedy(Graph g){
+Cut construct_greedy(Graph& g){
     return Cut();
 }
 
