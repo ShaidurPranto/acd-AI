@@ -11,7 +11,7 @@
 using namespace std;
 
 
-Cut construct_semi_greedy(Graph& g){
+Cut construct_semi_greedy(Graph& g , double alpha = 0){
     // debug
     cout << "starting semi greedy construction" << endl;
 
@@ -31,7 +31,7 @@ Cut construct_semi_greedy(Graph& g){
 
     int n = g.weights.size();
 
-    double alpha = (rand() % 100 / 100.0);
+    if (alpha == 0) alpha = (rand() % 100 / 100.0);
 
     while(cut.x.size() + cut.y.size() < n){
         function_values.clear();

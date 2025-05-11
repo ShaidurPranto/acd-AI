@@ -11,7 +11,7 @@
 
 using namespace std;
 
-Cut grasp(Graph& g,int max_iterations){
+Cut grasp(Graph& g,int max_iterations,double alpha = 0){
     // debug
     cout << "starting GRASP" << endl;
 
@@ -20,7 +20,7 @@ Cut grasp(Graph& g,int max_iterations){
         // debug
         // cout << "Iteration: " << i + 1 << endl;
 
-        Cut cut = construct_semi_greedy(g);
+        Cut cut = construct_semi_greedy(g , alpha);
 
         // debug
         // cout << "Weight of cut from construction (semi greedy): " << weight_of_cut(g, cut) << endl;

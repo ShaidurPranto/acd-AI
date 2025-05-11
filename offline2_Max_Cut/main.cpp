@@ -16,11 +16,13 @@ using namespace std;
 // const string file_type = ".txt";
 // const int grasp_number_of_iterations = 10;
 
-const int strat_index = 1;
-const int end_index = 7;
+const int strat_index = 2;
+const int end_index = 3;
 const string input_path = "./graph_GRASP/set1/g";
 const string file_type = ".rud";
-const int grasp_number_of_iterations = 10;
+const int grasp_number_of_iterations = 17;
+const int random_number_of_iterations = 19;
+const double alpha = 0.5;
 
 void generate_single_report_for_construction();
 void generate_single_report_for_local_search();
@@ -32,9 +34,11 @@ int main(){
     // generate_single_report_for_construction();
     // generate_single_report_for_local_search();
     // generate_single_report_for_grasp();
+
     generate_Complete_report();
 
-    // freopen("./graph_GRASP/set1/in4.txt", "r", stdin);
+
+    // freopen("./graph_GRASP/set1/g1.rud", "r", stdin);
 
     // int number_of_vertices , number_of_edges;
     // cin >> number_of_vertices >> number_of_edges;
@@ -52,6 +56,24 @@ int main(){
     //     g.updateEdgeWeight(a-1, b-1, w);
     // }
     // cout << "input taken from file" << endl;
+
+    // Cut random_cut = construct_random(g, random_number_of_iterations);
+    // Cut greedy_cut = construct_greedy(g);
+    // Cut semi_greedy_cut = construct_semi_greedy(g);
+
+    // CutForLocalSearch cutForLocalSearch_random = local_search(g, random_cut);
+    // CutForLocalSearch cutForLocalSearch_greedy = local_search(g, greedy_cut);
+    // CutForLocalSearch cutForLocalSearch_semi_greedy = local_search(g, semi_greedy_cut);
+
+    // Cut grasp_cut = grasp(g, grasp_number_of_iterations , alpha);
+
+    // cout << "random cut weight: " << weight_of_cut(g, random_cut) << endl;
+    // cout << "greedy cut weight: " << weight_of_cut(g, greedy_cut) << endl;
+    // cout << "semi greedy cut weight: " << weight_of_cut(g, semi_greedy_cut) << endl;
+    // cout << "random cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_random.cut) << endl;
+    // cout << "greedy cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_greedy.cut) << endl;
+    // cout << "semi greedy cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_semi_greedy.cut) << endl;
+    // cout << "grasp cut weight: " << weight_of_cut(g, grasp_cut) << endl;
 
     return 0;
 }
@@ -85,7 +107,7 @@ void generate_Complete_report(){
             g.updateEdgeWeight(a-1, b-1, w);
         }
 
-        Cut heuristic_random_cut = construct_random(g);
+        Cut heuristic_random_cut = construct_random(g, random_number_of_iterations);
         int random_weight = weight_of_cut(g, heuristic_random_cut);
 
         Cut heuristic_greedy_cut = construct_greedy(g);
@@ -109,11 +131,13 @@ void generate_Complete_report(){
         int local_search_semi_greedy_weight = weight_of_cut(g, cutForLocalSearch_semi_greedy.cut);
         int local_search_semi_greedy_iterations = cutForLocalSearch_semi_greedy.NumberOfIterations;
 
+        int average_local_search_iterations = round( (local_search_random_iterations + local_search_greedy_iterations + local_search_semi_greedy_iterations)/(3 + 0.0));
+        int average_local_search_weight = round( (local_search_random_weight + local_search_greedy_weight + local_search_semi_greedy_weight)/(3 + 0.0));
+
         // debug
         cout << "All three local searches are done with weights: " << weight_of_cut(g, cutForLocalSearch_random.cut) << " , " << weight_of_cut(g, cutForLocalSearch_greedy.cut) << " , " << weight_of_cut(g, cutForLocalSearch_semi_greedy.cut) << endl;
 
-        int number_of_iterations = 10;
-        Cut grasp_cut = grasp(g, number_of_iterations);
+        Cut grasp_cut = grasp(g, grasp_number_of_iterations , alpha);
         int grasp_weight = weight_of_cut(g, grasp_cut);
 
         // debug
@@ -123,9 +147,9 @@ void generate_Complete_report(){
              << random_weight << ","
              << greedy_weight << ","
              << semi_greedy_weight << ","
-             << local_search_semi_greedy_iterations << ","
-             << local_search_semi_greedy_weight << ","
-             << number_of_iterations << ","
+             << average_local_search_iterations << ","
+             << average_local_search_weight << ","
+             << grasp_number_of_iterations << ","
              << weight_of_cut(g, grasp_cut) 
              << endl;
     }
@@ -161,11 +185,10 @@ void generate_single_report_for_grasp(){
             g.updateEdgeWeight(a-1, b-1, w);
         }
 
-        int number_of_iterations = grasp_number_of_iterations;
-        Cut cut = grasp(g, number_of_iterations);
+        Cut cut = grasp(g, grasp_number_of_iterations , alpha);
         int weight = weight_of_cut(g, cut);
 
-        fout << "G" + to_string(i) + "," << number_of_vertices << "," << number_of_edges << "," << number_of_iterations << "," << weight << endl;
+        fout << "G" + to_string(i) + "," << number_of_vertices << "," << number_of_edges << "," << grasp_number_of_iterations << "," << weight << endl;
 
     }
 

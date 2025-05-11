@@ -67,7 +67,7 @@ struct Cut
     }
 };
 
-
+// local search returns cut and number of iterations
 struct CutForLocalSearch
 {
     Cut cut;
