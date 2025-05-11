@@ -31,7 +31,10 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
 
     int n = g.weights.size();
 
-    if (alpha == 0) alpha = (rand() % 100 / 100.0);
+    if (alpha == 0) alpha = (get_random_int() % 100 / 100.0);
+
+    // debug
+    cout << "alpha: "<< alpha << endl;    
 
     while(cut.x.size() + cut.y.size() < n){
         function_values.clear();
@@ -64,7 +67,7 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
                 if(maximum < max(sigma_x, sigma_y)){
                     maximum = max(sigma_x, sigma_y);
                 }
-                if(minimum > min(sigma_x, sigma_y)){
+                if(minimum > min(sigma_x, sigma_y)){ 
                     minimum = min(sigma_x, sigma_y);
                 }
             }
@@ -82,7 +85,7 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
         // cout << "RCL building done" << endl;
         
         // select vertex from rcl
-        int selected_vertex = rcl[random() % rcl.size()];
+        int selected_vertex = rcl[get_random_int() % rcl.size()];
 
         // place vertex in cut
         if(weight_x[selected_vertex] >= weight_y[selected_vertex]){

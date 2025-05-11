@@ -2,7 +2,6 @@
 #define HEURISTIC_GREEDY_HPP
 
 #include <iostream>
-#include <random>
 #include <vector>
 
 #include "graph.hpp"

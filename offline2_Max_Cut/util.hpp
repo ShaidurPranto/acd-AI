@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <random>
+#include <chrono>
 
 #include "graph.hpp"
 
@@ -63,6 +64,14 @@ vector<int> remove_vertex_from_group(int vertex, vector<int>& group){
         }
     }
     return new_group;
+}
+
+
+
+int get_random_int() {
+    static mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+    static uniform_int_distribution<int> dist(1, numeric_limits<int>::max());
+    return dist(rng);
 }
 
 #endif
