@@ -24,48 +24,21 @@ Cut construct_greedy(Graph& g){
     taken[maxEdge.vertex_a] = true;
     taken[maxEdge.vertex_b] = true;
 
-    vector<int> function_values(g.number_of_vertices, 0);
-    vector<int> weight_x(g.number_of_vertices, 0);
-    vector<int> weight_y(g.number_of_vertices, 0);
+    int n = g.number_of_vertices;
 
-    int n = g.weights.size();
+    for(int i = 0; i < g.number_of_vertices; i++){
+        if(!taken[i]){
+            int sigma_x = value_for_group(g, i, cut.x);
+            int sigma_y = value_for_group(g, i, cut.y);
 
-    while(cut.x.size() + cut.y.size() < n){
-        function_values.clear();
-        function_values.resize(g.number_of_vertices, 0);
-        weight_x.clear();
-        weight_x.resize(g.number_of_vertices, 0);
-        weight_y.clear();
-        weight_y.resize(g.number_of_vertices, 0);
-
-        // compute greedy function values 
-        int maxValueIndex = -1;
-        for(int i = 0; i < g.number_of_vertices; i++){
-            if(!taken[i]){
-                int sigma_x = value_for_group(g, i, cut.x);
-                int sigma_y = value_for_group(g, i, cut.y);
-
-                function_values[i] = max(sigma_x, sigma_y);
-                weight_x[i] = sigma_x;
-                weight_y[i] = sigma_y;
-
-                if(maxValueIndex == -1 || function_values[i] > function_values[maxValueIndex]){
-                    maxValueIndex = i;
-                }
+            if(sigma_x >= sigma_y){
+                cut.y.push_back(i);
+            } else {
+                cut.x.push_back(i);
             }
+            taken[i] = true;
+
         }
-
-        // place vertex in cut
-        if(weight_x[maxValueIndex] >= weight_y[maxValueIndex]){
-            cut.y.push_back(maxValueIndex);
-        } else {
-            cut.x.push_back(maxValueIndex);
-        }
-
-        taken[maxValueIndex] = true;
-
-        //debug
-        // cout << "total vertices in cut: " << cut.x.size() + cut.y.size() << endl;
     }
 
     // debug

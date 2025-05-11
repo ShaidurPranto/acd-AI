@@ -12,6 +12,9 @@ using namespace std;
 
 
 Cut construct_semi_greedy(Graph& g , double alpha = 0){
+    random_device rd;
+    mt19937 gen(rd());
+    
     // debug
     cout << "starting semi greedy construction" << endl;
 
@@ -29,47 +32,36 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
     vector<int> weight_x(g.number_of_vertices, 0);
     vector<int> weight_y(g.number_of_vertices, 0);
 
-    int n = g.weights.size();
+    int n = g.number_of_vertices;
 
-    if (alpha == 0) alpha = (get_random_int() % 100 / 100.0);
+    if (alpha == 0) alpha = ((get_random_int() % 100) / 100.0);
 
     // debug
     cout << "alpha: "<< alpha << endl;    
 
-    while(cut.x.size() + cut.y.size() < n){
+    while((cut.x.size() + cut.y.size()) < n){
         function_values.clear();
-        function_values.resize(g.number_of_vertices, 0);
+        function_values.assign(g.number_of_vertices, 0);
         weight_x.clear();
-        weight_x.resize(g.number_of_vertices, 0);
+        weight_x.assign(g.number_of_vertices, 0);
         weight_y.clear();
-        weight_y.resize(g.number_of_vertices, 0);
+        weight_y.assign(g.number_of_vertices, 0);
 
         // compute greedy function values
         vector<int> rcl;
-        int minimum = -1;
+        int minimum = INT32_MAX;
         int maximum = -1;
         for(int i = 0; i < g.number_of_vertices; i++){
             if(!taken[i]){
                 int sigma_x = value_for_group(g, i, cut.x);
                 int sigma_y = value_for_group(g, i, cut.y);
-                
-                if(maximum == -1){
-                    maximum = max(sigma_x, sigma_y);
-                }
-                if(minimum == -1){
-                    minimum = min(sigma_x, sigma_y);
-                }
 
                 function_values[i] = max(sigma_x, sigma_y);
                 weight_x[i] = sigma_x;
                 weight_y[i] = sigma_y;
 
-                if(maximum < max(sigma_x, sigma_y)){
-                    maximum = max(sigma_x, sigma_y);
-                }
-                if(minimum > min(sigma_x, sigma_y)){ 
-                    minimum = min(sigma_x, sigma_y);
-                }
+                maximum = max(maximum, max(sigma_x, sigma_y));
+                minimum = min(minimum, min(sigma_x, sigma_y));
             }
         }
 
@@ -85,7 +77,9 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
         // cout << "RCL building done" << endl;
         
         // select vertex from rcl
-        int selected_vertex = rcl[get_random_int() % rcl.size()];
+        uniform_int_distribution<> dis(0, rcl.size() - 1);
+        int random_index = dis(gen);
+        int selected_vertex = rcl[random_index];
 
         // place vertex in cut
         if(weight_x[selected_vertex] >= weight_y[selected_vertex]){

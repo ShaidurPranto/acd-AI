@@ -37,44 +37,44 @@ int main(){
     // generate_single_report_for_grasp();
 
     // generate_Complete_report();
-    generate_Complete_report_for_plot();
+    // generate_Complete_report_for_plot();
 
-    // freopen("./graph_GRASP/set1/g2.rud", "r", stdin);
+    freopen("./graph_GRASP/set1/g1.rud", "r", stdin);
 
-    // int number_of_vertices , number_of_edges;
-    // cin >> number_of_vertices >> number_of_edges;
+    int number_of_vertices , number_of_edges;
+    cin >> number_of_vertices >> number_of_edges;
 
-    // cout << "trying to create graph"<<endl;
-    // cout << "number of vertices: " << number_of_vertices << endl;
-    // cout << "number of edges: " << number_of_edges << endl;
+    cout << "trying to create graph"<<endl;
+    cout << "number of vertices: " << number_of_vertices << endl;
+    cout << "number of edges: " << number_of_edges << endl;
 
-    // Graph g(number_of_vertices);
-    // cout << "graph created" << endl;
-    // g.number_of_edges = number_of_edges;
-    // for(int i=0;i<number_of_edges;i++){
-    //     int a, b, w;
-    //     cin >> a >> b >> w;
-    //     g.updateEdgeWeight(a-1, b-1, w);
-    // }
-    // cout << "input taken from file" << endl;
+    Graph g(number_of_vertices);
+    cout << "graph created" << endl;
+    g.number_of_edges = number_of_edges;
+    for(int i=0;i<number_of_edges;i++){
+        int a, b, w;
+        cin >> a >> b >> w;
+        g.updateEdgeWeight(a-1, b-1, w);
+    }
+    cout << "input taken from file" << endl;
 
-    // Cut random_cut = construct_random(g, random_number_of_iterations);
-    // Cut greedy_cut = construct_greedy(g);
-    // Cut semi_greedy_cut = construct_semi_greedy(g,alpha);
+    Cut random_cut = construct_random(g, random_number_of_iterations);
+    Cut greedy_cut = construct_greedy(g);
+    Cut semi_greedy_cut = construct_semi_greedy(g,alpha);
 
-    // CutForLocalSearch cutForLocalSearch_random = local_search(g, random_cut);
-    // CutForLocalSearch cutForLocalSearch_greedy = local_search(g, greedy_cut);
-    // CutForLocalSearch cutForLocalSearch_semi_greedy = local_search(g, semi_greedy_cut);
+    CutForLocalSearch cutForLocalSearch_random = local_search(g, random_cut);
+    CutForLocalSearch cutForLocalSearch_greedy = local_search(g, greedy_cut);
+    CutForLocalSearch cutForLocalSearch_semi_greedy = local_search(g, semi_greedy_cut);
 
-    // Cut grasp_cut = grasp(g, grasp_number_of_iterations , alpha);
+    Cut grasp_cut = grasp(g, grasp_number_of_iterations , alpha);
 
-    // cout << "random cut weight: " << weight_of_cut(g, random_cut) << endl;
-    // cout << "greedy cut weight: " << weight_of_cut(g, greedy_cut) << endl;
-    // cout << "semi greedy cut weight: " << weight_of_cut(g, semi_greedy_cut) << endl;
-    // cout << "random cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_random.cut) << endl;
-    // cout << "greedy cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_greedy.cut) << endl;
-    // cout << "semi greedy cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_semi_greedy.cut) << endl;
-    // cout << "grasp cut weight: " << weight_of_cut(g, grasp_cut) << endl;
+    cout << "random cut weight: " << weight_of_cut(g, random_cut) << endl;
+    cout << "greedy cut weight: " << weight_of_cut(g, greedy_cut) << endl;
+    cout << "semi greedy cut weight: " << weight_of_cut(g, semi_greedy_cut) << endl;
+    cout << "random cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_random.cut) << endl;
+    cout << "greedy cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_greedy.cut) << endl;
+    cout << "semi greedy cut after local search weight: " << weight_of_cut(g, cutForLocalSearch_semi_greedy.cut) << endl;
+    cout << "grasp cut weight: " << weight_of_cut(g, grasp_cut) << endl;
 
     return 0;
 }

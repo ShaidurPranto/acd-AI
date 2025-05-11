@@ -11,7 +11,7 @@
 using namespace std;
 
 Edge get_max_weight_edge(Graph& g){
-    int n = g.weights.size();
+    int n = g.number_of_vertices;
     Edge edge;
     for(int i=0;i<n;i++){
         for(int j=0;j<i;j++){

@@ -22,7 +22,7 @@ struct custom_compare{
     }
 };
 
-CutForLocalSearch local_search(Graph& g, Cut& cut){
+CutForLocalSearch local_search(Graph& g, Cut cut){
     // debug
     cout << "Starting local search" << endl;
 
