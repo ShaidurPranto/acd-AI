@@ -13,7 +13,7 @@ using namespace std;
 
 Cut grasp(Graph& g,int max_iterations,double alpha = 0){
     // debug
-    cout << "starting GRASP" << endl;
+    // cout << "starting GRASP" << endl;
 
     Cut bestCut;
     for(int i=0;i<max_iterations;i++){
@@ -36,7 +36,7 @@ Cut grasp(Graph& g,int max_iterations,double alpha = 0){
     }
 
     // debug
-    cout << "Ending Grasp" << endl;
+    // cout << "Ending Grasp" << endl;
 
     return bestCut;
 }

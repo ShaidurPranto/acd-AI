@@ -24,7 +24,7 @@ struct custom_compare{
 
 CutForLocalSearch local_search(Graph& g, Cut cut){
     // debug
-    cout << "Starting local search" << endl;
+    // cout << "Starting local search" << endl;
 
     priority_queue<TempNode, vector<TempNode>, custom_compare> pq;
     int number_of_iterations = 0;
@@ -73,7 +73,7 @@ CutForLocalSearch local_search(Graph& g, Cut cut){
     // cout << "Number of iterations: " << number_of_iterations << endl;
 
     // debug
-    cout << "Ending local search" << endl;
+    // cout << "Ending local search" << endl;
     
     return CutForLocalSearch(cut, number_of_iterations);
 }

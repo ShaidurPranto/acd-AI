@@ -15,8 +15,8 @@ double getProbability(){
     return random_number;
 }
 
-Cut construct_random(Graph& g,int max_iterations){
-    Cut bestCut;
+int construct_random(Graph& g,int max_iterations){
+    long long int total_weight = 0;
     for(int i=0;i<max_iterations;i++){
         Cut cut;
         for(int j=0;j<g.number_of_vertices;j++){
@@ -27,11 +27,11 @@ Cut construct_random(Graph& g,int max_iterations){
                 cut.y.push_back(j);
             }
         }
-        if(weight_of_cut(g, cut) > weight_of_cut(g, bestCut)){
-            bestCut = cut;
-        }
+        int weight = weight_of_cut(g, cut);
+        total_weight = total_weight + weight;
     }
-    return bestCut;
+    int average_weight = total_weight / max_iterations;
+    return average_weight;
 }
 
 

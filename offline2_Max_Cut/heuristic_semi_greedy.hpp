@@ -16,7 +16,7 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
     mt19937 gen(rd());
     
     // debug
-    cout << "starting semi greedy construction" << endl;
+    // cout << "starting semi greedy construction" << endl;
 
     Edge maxEdge = get_max_weight_edge(g);
 
@@ -37,7 +37,7 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
     if (alpha == 0) alpha = ((get_random_int() % 100) / 100.0);
 
     // debug
-    cout << "alpha: "<< alpha << endl;    
+    // cout << "alpha: "<< alpha << endl;    
 
     while((cut.x.size() + cut.y.size()) < n){
         function_values.clear();
@@ -73,6 +73,16 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
             }
         }
 
+        if(rcl.size() == 0){
+            // debug
+            // cout << "RCL is empty" << endl;
+            for(int i = 0; i < g.number_of_vertices; i++){
+                if(!taken[i]){
+                    rcl.push_back(i);
+                }
+            }
+        }
+
         // debug
         // cout << "RCL building done" << endl;
         
@@ -95,7 +105,7 @@ Cut construct_semi_greedy(Graph& g , double alpha = 0){
     }
 
     // debug
-    cout << "Ending semi greedy construction" << endl;
+    // cout << "Ending semi greedy construction" << endl;
 
     return cut;
 }

@@ -12,7 +12,7 @@ using namespace std;
 
 Cut construct_greedy(Graph& g){
     // debug
-    cout << "starting greedy construction" << endl;
+    // cout << "starting greedy construction" << endl;
 
     Edge maxEdge = get_max_weight_edge(g);
 
@@ -42,7 +42,7 @@ Cut construct_greedy(Graph& g){
     }
 
     // debug
-    cout << "Ending greedy construction" << endl;
+    // cout << "Ending greedy construction" << endl;
 
     return cut;
 }
