@@ -7,26 +7,12 @@
 #include <cmath>
 #include "game.hpp"
 
+#include "util.hpp"
+
 using namespace std;
 
 class Heuristic {
-private:
-    // Helper function to get critical mass for a cell at position (row, col)
-    int getCriticalMass(int row, int col, int rows, int cols) {
-        // Corner cells: 2 neighbors
-        if ((row == 0 || row == rows - 1) && (col == 0 || col == cols - 1)) {
-            return 2;
-        }
-        // Edge cells: 3 neighbors  
-        else if (row == 0 || row == rows - 1 || col == 0 || col == cols - 1) {
-            return 3;
-        }
-        // Interior cells: 4 neighbors
-        else {
-            return 4;
-        }
-    }
-    
+
     // Helper function to count orbs for each player
     pair<int, int> countOrbs(const State& state) {
         int redOrbs = 0, greenOrbs = 0;
@@ -119,7 +105,6 @@ private:
         return {redControl, greenControl};
     }
 
-public:
     // Heuristic 1: Simple Orb Count Difference
     int orbCountHeuristic(const State& state, Color maximizingPlayer) {
         auto [redOrbs, greenOrbs] = countOrbs(state);
@@ -180,8 +165,11 @@ public:
         return orbDiff * 2 + cellDiff * 5 + controlDiff * 3 + criticalDiff * 4;
     }
     
-    // Main evaluation function that can switch between different heuristics
-    int evaluate(const State& state, Color maximizingPlayer, int heuristicType = 5) {
+    public: 
+
+    int evaluate(const State& state, int heuristicType = 5) {
+        Color maximizingPlayer = getMaximizingPlayer();
+
         // Check for terminal states first
         auto [redOrbs, greenOrbs] = countOrbs(state);
         
@@ -202,11 +190,6 @@ public:
             case 5: return compositeHeuristic(state, maximizingPlayer);
             default: return compositeHeuristic(state, maximizingPlayer);
         }
-    }
-    
-    // Overloaded evaluate function for backward compatibility
-    int evaluate(State state) {
-        return evaluate(state, state.turn, 5); // Default to composite heuristic
     }
 };
 

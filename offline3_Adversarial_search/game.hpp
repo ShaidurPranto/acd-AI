@@ -6,32 +6,77 @@
 
 using namespace std;
 
-enum PlayMode {
+enum PlayMode
+{
     HUMAN,
     AI
 };
 
-enum Color {
+enum Color
+{
     EMPTY,
     RED,
     GREEN
 };
 
-struct Player {
+struct Player
+{
     PlayMode mode;
     Color playerColor;
     int depth;
+    int htype;
 };
 
-struct Cell {
+struct Cell
+{
     int numberOfOrbs;
     Color orbColor;
 };
 
-struct State {
+struct State
+{
     vector<vector<Cell>> board;
     Color turn;
 };
 
+struct Move
+{
+    int row;
+    int col;
+    int value;
+
+    Move()
+    {
+        this->row = this->col = -1;
+        this->value = 0;
+    }
+    Move(int value)
+    {
+        this->value = value;
+        this->col = this->row = -1;
+    }
+    Move(int row, int col)
+    {
+        this->row = row;
+        this->col = col;
+        this->value = 0;
+    }
+    Move(int row, int col, int value)
+    {
+        this->value = value;
+        this->row = row;
+        this->col = col;
+    }
+};
+
+// assuming RED is the maximizing player
+Color getMaximizingPlayer() {
+    return RED;
+}
+
+// debugging purpose
+bool debug(){
+    return false;
+}
 
 #endif

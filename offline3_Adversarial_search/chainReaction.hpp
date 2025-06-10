@@ -2,10 +2,17 @@
 #define CHAIN_REACTION_HPP
 
 #include <iostream>
-#include <queue>    
+#include <queue>
+#include <fstream>    
+#include <thread>
+#include <chrono>
+#include <cstdio>
 
 #include "game.hpp"
+#include "util.hpp"
 #include "minimax.hpp"
+
+#define UI 1
 
 using namespace std;
 
@@ -16,28 +23,11 @@ class ChainReaction {
     Player Player2;
     State currentState;
     int numberOfMoves;
+    MinimaxSearch minimax;
+    string fileName;
 
-    bool isGameOver(const State& state) {
-        if(numberOfMoves <2) {
-            return false;
-        }
 
-        bool hasRed = false;
-        bool hasGreen = false;
-
-        for (const auto& row : state.board) {
-            for (const auto& cell : row) {
-                if (cell.numberOfOrbs > 0) {
-                    if (cell.orbColor == RED) hasRed = true;
-                    else hasGreen = true;
-                }
-            }
-        }
-
-        // game overs when one player has no orbs left
-        return !(hasRed && hasGreen);
-    }
-
+    // check if a move is valid
     bool isValidMove(int row, int col, Color playerColor) {
         if (row < 0 || row >= rows || col < 0 || col >= cols) {
             return false; 
@@ -53,137 +43,12 @@ class ChainReaction {
         Cell& cell = currentState.board[row][col];
         cell.numberOfOrbs++;
         cell.orbColor = playerColor;
-        numberOfMoves++;
-    }
 
-    int getCriticalMass(int row, int col) {
-        int mass = 0;
-        if(col - 1 >= 0) mass++;
-        if(col + 1 < cols) mass++;
-        if(row - 1 >= 0) mass++;
-        if(row + 1 < rows) mass++;
-        return mass;
-    }
+        checkChainReaction(currentState, row, col, playerColor);
 
-    void checkChainReaction(int row, int col, Color playerColor) {
-        int criticalMass = getCriticalMass(row, col);
-        Cell& cell = currentState.board[row][col];
-
-        if(cell.numberOfOrbs < criticalMass) {
-            return; 
-        }
-
-        queue<pair<int, int>> toExplode;
-        toExplode.push({row, col});
-        
-        while (!toExplode.empty()) {
-            pair<int,int> curr = toExplode.front();
-            int r = curr.first;
-            int c = curr.second;
-            toExplode.pop();
-
-            Cell& explodingCell = currentState.board[r][c];
-            int criticalMass = getCriticalMass(r, c);
-
-            // explodingCell.numberOfOrbs = explodingCell.numberOfOrbs - criticalMass;
-            explodingCell.numberOfOrbs = 0;  
-            // explodingCell.orbColor = playerColor; 
-
-            if(c - 1 >= 0) {
-                Cell& leftCell = currentState.board[r][c - 1];
-                leftCell.numberOfOrbs++;
-                leftCell.orbColor = playerColor;
-                if(leftCell.numberOfOrbs >= getCriticalMass(r, c - 1)) {
-                    toExplode.push({r, c - 1});
-                }
-            }
-            if(c + 1 < cols) {
-                Cell& rightCell = currentState.board[r][c + 1];
-                rightCell.numberOfOrbs++;
-                rightCell.orbColor = playerColor;
-                if(rightCell.numberOfOrbs >= getCriticalMass(r, c + 1)) {
-                    toExplode.push({r, c + 1});
-                }
-            }
-            if(r - 1 >= 0) {
-                Cell& upCell = currentState.board[r - 1][c];
-                upCell.numberOfOrbs++;
-                upCell.orbColor = playerColor;
-                if(upCell.numberOfOrbs >= getCriticalMass(r - 1, c)) {
-                    toExplode.push({r - 1, c});
-                }
-            }
-            if(r + 1 < rows) {
-                Cell& downCell = currentState.board[r + 1][c];
-                downCell.numberOfOrbs++;
-                downCell.orbColor = playerColor;
-                if(downCell.numberOfOrbs >= getCriticalMass(r + 1, c)) {
-                    toExplode.push({r + 1, c});
-                }
-            }
-
-        }
-    }
-
-    void takeHumanMove(Player player) {
-        int row, col;
-        cout << "Player " << (player.playerColor == RED ? "Red" : "Green") << ", enter your move (row and column): ";
-        cin >> row >> col;
-
-        // validate and make the move
-        if (isValidMove(row, col, player.playerColor)) {
-            makeMove(row, col, player.playerColor);
-            checkChainReaction(row, col, player.playerColor);
-            currentState.turn = (player.playerColor == RED) ? GREEN : RED;
-        } else {
-            cout << "Invalid move. Try again." << endl;
-            takeHumanMove(player);
-        }
-    }
-
-    void printRed(string msg) {
-        // ANSI color codes
-        const string RED_COLOR = "\033[31m";    // Red text
-        const string RESET_COLOR = "\033[0m";   // Reset to default color
-        
-        cout << RED_COLOR << msg << RESET_COLOR;
-    }
-
-    void printGreen(string msg) {
-        // ANSI color codes
-        const string GREEN_COLOR = "\033[32m";  // Green text
-        const string RESET_COLOR = "\033[0m";   // Reset to default color
-
-        cout << GREEN_COLOR << msg << RESET_COLOR;
-    }
-
-    void printGame(bool title = true) {
-        cout << "----------------------------------------------" << endl;
-        if(title) {
-            string current = (currentState.turn == RED ? "Red" : "Green");
-            string header = current + "'s turn\n";
-            if(currentState.turn == RED) {
-                printRed(header);
-            } else {
-                printGreen(header);
-            }
-        }
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                Cell& cell = currentState.board[i][j];
-                
-                if (cell.orbColor == RED) {
-                    printRed(to_string(cell.numberOfOrbs) + "R");
-                } else if (cell.orbColor == GREEN) {
-                    printGreen(to_string(cell.numberOfOrbs) + "G");
-                } else {
-                    // Empty cell - use default color
-                    cout << cell.numberOfOrbs << "E";
-                }
-                cout << "  ";
-            }
-            cout << endl;
+        if(!UI){
+            numberOfMoves++;
+            currentState.turn = (playerColor == RED) ? GREEN : RED;
         }
     }
 
@@ -210,9 +75,233 @@ class ChainReaction {
         }
     }
 
-public:
+    void takeHumanMoveFromUI(Player player) {
+        cout << "Waiting for human move..." << endl;
+        
+        // Keep checking the game state file until it shows "Human Move:"
+        while (true) {
+            ifstream gameStateFile("game_state.txt");
+            if (gameStateFile.is_open()) {
+                string headerLine;
+                getline(gameStateFile, headerLine);
+                gameStateFile.close();
+                
+                // Check if the header indicates it's a human move
+                if (headerLine.find("Human Move:") != string::npos) {
+                    cout << "Human turn detected" << endl;
+                    break; // Exit the waiting loop
+                }
+            }
+            
+            // Wait a bit before checking again
+            this_thread::sleep_for(chrono::milliseconds(500));
+        }
 
-    ChainReaction(int rows, int cols, Player player1, Player player2) {
+        // get the updated game state from the file
+        vector< vector<Cell> > board(rows, vector<Cell>(cols, {0, EMPTY}));
+        board = this->currentState.board;
+        takeInputFromFile();
+
+        // detect the cell with difference
+        int row = -1, col = -1;
+        for(int i = 0;i < this->rows; i++) {
+            for(int j = 0; j < this->cols; j++){
+                if(board[i][j].numberOfOrbs != this->currentState.board[i][j].numberOfOrbs) {
+                    row = i;
+                    col = j;
+                    break;
+                }
+            }
+        }
+
+        cout << "HUMAN MOVE: " << row << " , " << col << endl;
+
+        if(row == -1 || col == -1) {
+            cout << "Invalid move detected, please try again." << endl;
+            exit(1);
+            // takeHumanMove(player);
+            // return;
+        }
+
+        // make chain reaction 
+        checkChainReaction(this->currentState,row,col,this->currentState.board[row][col].orbColor);
+    }  
+
+    void takeHumanMoveFromConsole(Player player) {
+        int row, col;
+        cout << "Player " << (player.playerColor == RED ? "Red" : "Green") << ", enter your move (row and column): ";
+        cin >> row >> col;
+
+        // validate and make the move
+        if (isValidMove(row, col, player.playerColor)) {
+            makeMove(row, col, player.playerColor);
+        } else {
+            cout << "Invalid move. Try again." << endl;
+            takeHumanMove(player);
+        }
+    }
+
+    void takeHumanMove(Player player) {
+        if(UI) {
+            // take input from UI
+            takeHumanMoveFromUI(player);
+        } else {
+            // take input from console
+            takeHumanMoveFromConsole(player);
+        }
+    }
+
+    void makeAIMove(Player player) {
+        minimax.setState(this->currentState);
+        minimax.setDepth(player.depth);
+        minimax.setHeuristic(player.htype);
+
+        Move move;
+
+        if(isMaximizingPlayer(player.playerColor)) {
+            // maximizing agent
+            cout << "AI trying to make maximizing move" << endl;
+        }else {
+            // minimizing agent
+            cout << "AI trying to make minimizing move" << endl;
+        }
+
+        move = minimax.minimax();
+
+        int row = move.row;
+        int col = move.col;
+        int value = move.value;
+
+        cout << "AI MOVE - value: " << value << " row: " << row << " col: " << col << endl;
+
+
+        if(isValidMove(row,col,player.playerColor)) {
+            makeMove(row,col,player.playerColor);
+            // wait for some miliseconds
+            this_thread::sleep_for(chrono::milliseconds(1000));
+        }else{
+            cout << "AI failed to make move" << endl;
+            exit(1);
+            // makeAIMove(player);
+            // currentState.turn = (player.playerColor == RED) ? GREEN : RED;
+        }        
+    }
+    
+    // takes input from file and updates the board
+    void takeInputFromFile(){
+        // if(numberOfMoves == 0) return;
+
+        ifstream inputFile(fileName);
+        if (!inputFile) {
+            cerr << "Error opening file: " << fileName << endl;
+            return;
+        }
+
+        // read header
+        string header1 , header2 = "";
+        inputFile >> header1 >> header2;
+
+        // read rows and columns
+        vector< vector<Cell> > board(rows, vector<Cell>(cols, {0, EMPTY}));
+        for(int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                string cell;
+                inputFile >> cell;
+
+                char num = cell[0];
+                int numberOfOrbs = atoi(&num);
+                char orbColor = 'E';
+                if(cell.length() > 1) {
+                    orbColor = cell[1];
+                }
+
+                board[i][j].numberOfOrbs = numberOfOrbs;
+                if (orbColor == 'R') {
+                    board[i][j].orbColor = RED;
+                } else if (orbColor == 'G') {
+                    board[i][j].orbColor = GREEN;
+                } else {
+                    board[i][j].orbColor = EMPTY;
+                }
+            }
+        }
+
+        // update the current state
+        currentState.board = board;
+        inputFile.close();
+    }
+
+    void initialWriteToFile() {
+        ofstream outputFile(fileName);
+        if (!outputFile) {
+            cerr << "Error opening file: " << fileName << endl;
+            return;
+        }
+
+        // write header
+        outputFile << (Player2.mode == HUMAN ? "Human" : "AI") << " Move:" << endl; 
+
+        // write rows and columns
+        for(int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                outputFile << "0";
+                outputFile << " ";
+            }
+            outputFile << endl;
+        }
+
+        outputFile.close();
+    }
+
+    void writeToFile() {
+        ofstream outputFile(fileName);
+        if (!outputFile) {
+            cerr << "Error opening file: " << fileName << endl;
+            return;
+        }
+
+        // write header
+        if(numberOfMoves % 2 == 0) {
+            outputFile << (Player1.mode == HUMAN ? "Human" : "AI") << " Move:" << endl; 
+        } else {
+            outputFile << (Player2.mode == HUMAN ? "Human" : "AI") << " Move:" << endl;
+        }
+
+        // write rows and columns
+        for(int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Cell &cell = currentState.board[i][j];
+                outputFile << cell.numberOfOrbs;
+
+                if(cell.numberOfOrbs != 0){
+                    if (cell.orbColor == RED) {
+                        outputFile << "R";
+                    } else if (cell.orbColor == GREEN) {
+                        outputFile << "G";
+                    }
+                }
+
+                outputFile << " ";
+            }
+            outputFile << endl;
+        }
+
+        outputFile.close();
+
+        // flip the turn
+        numberOfMoves++;
+        if(currentState.turn == RED) {
+            currentState.turn = GREEN;
+            cout << "made the turn GREEN" << endl;
+        } else {
+            currentState.turn = RED;
+            cout << "made the run RED" << endl;
+        }
+    }
+
+    public:
+
+    ChainReaction(int rows, int cols, Player player1, Player player2, string filename) {
         this->rows = rows;
         this->cols = cols;
 
@@ -223,17 +312,26 @@ public:
         Player2 = player2;
 
         numberOfMoves = 0;
+
+        this->fileName = filename;
+
+        if(UI) initialWriteToFile();
     }
 
     void start() {
         while (!isGameOver(currentState)) {
-            printGame();
+            if(UI) {
+                takeInputFromFile();
+            }
+
+            printGame(this->currentState);
             if(currentState.turn == Player1.playerColor) {
                 // player 1's turn
                 if (Player1.mode == HUMAN) {
                     takeHumanMove(Player1);
                 } else {
                     // handle AI move
+                    makeAIMove(Player1);
                 }
             } else {
                 // player 2's turn
@@ -241,7 +339,12 @@ public:
                     takeHumanMove(Player2);
                 } else {
                     // handle AI move
+                    makeAIMove(Player2);
                 }
+            }
+
+            if(UI) {
+                writeToFile();
             }
         }
 
@@ -252,7 +355,7 @@ public:
         } else if(winner == GREEN) {
             printGreen("Green wins!\n");
         } 
-        printGame(false);
+        printGame(this->currentState, false);
     }
 };
 
