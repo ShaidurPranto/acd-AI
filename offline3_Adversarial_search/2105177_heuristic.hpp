@@ -5,9 +5,9 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include "game.hpp"
 
-#include "util.hpp"
+#include "2105177_game.hpp"
+#include "2105177_util.hpp"
 
 using namespace std;
 

@@ -6,9 +6,9 @@
 #include <limits>
 #include <algorithm>
 
-#include "game.hpp"
-#include "util.hpp"
-#include "heuristic.hpp"
+#include "2105177_game.hpp"
+#include "2105177_util.hpp"
+#include "2105177_heuristic.hpp"
 
 using namespace std;
 
@@ -168,12 +168,21 @@ private:
     }
 
     // set the current game state
-    void setState(const State& state) {
-        currentState = state;
+    void setState(State state) {
+        this->currentState = state;
     }
 
     // minimax search 
-    Move minimax() {
+    Move minimax(bool randomMove = false) {
+        if (randomMove) {
+            // generate a random move
+            vector<Move> moves = generateMoves(currentState);
+            if (moves.empty()) {
+                return Move(); // no valid moves
+            }
+            int randomIndex = rand() % moves.size();
+            return moves[randomIndex];
+        }
         int alpha = numeric_limits<int>::min();
         int beta = numeric_limits<int>::max();
         return minimax_search(currentState,depth,alpha,beta);

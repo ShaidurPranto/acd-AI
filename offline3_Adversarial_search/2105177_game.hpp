@@ -4,6 +4,12 @@
 #include <iostream>
 #include <vector>
 
+#define UI 0
+
+#define TIME_DELAY_AMONG_TWO_AI_MOVES 1000 // in milliseconds
+#define TIME_DELAY_AMONG_TWO_CHAIN_REACTIONS 1000 // in milliseconds
+
+
 using namespace std;
 
 enum PlayMode
