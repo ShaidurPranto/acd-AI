@@ -5,6 +5,20 @@
 
 using namespace std;
 
+void discretizeAdultDataset(Process& process) {
+    process.discretizeNumericalColumn(0, 3);  
+    process.discretizeNumericalColumn(2, 3);  
+    process.discretizeNumericalColumn(10, 3); 
+    process.discretizeNumericalColumn(11, 3); 
+    process.discretizeNumericalColumn(12, 3); 
+}
+void discretizeIrisDataset(Process& process) {
+    process.discretizeNumericalColumn(0, 3);  
+    process.discretizeNumericalColumn(1, 3);  
+    process.discretizeNumericalColumn(2, 3); 
+    process.discretizeNumericalColumn(3, 3); 
+}
+
 
 int main()
 {
@@ -12,7 +26,8 @@ int main()
     double splitRatio = 0.8;
 
     Process process(filename, splitRatio);
-    process.trimFirstColumnFromFile();
+    discretizeAdultDataset(process);
+
     process.startProcessing();
     vector<AttributeAllValues> attributes = process.getAttributeAllValues();
     vector<TrainingData> trainingData = process.getTrainingData();
@@ -28,6 +43,8 @@ int main()
     id3.printTree();
     cout << endl << endl;
 
+    int correctPredictions = 0;
+    int totalPredictions = 0;
     for (auto test : testData) {
         Label result = id3.classify(test);
         cout << "Test Data: ";
@@ -39,10 +56,20 @@ int main()
         cout << "Actual Label: " << actualLabel.name << endl;
         if (result.name == actualLabel.name) {
             cout << "PREDICTION IS CORRECT." << endl;
+            correctPredictions++;
         } else {
             cout << "PREDICTION IS INCORRECT." << endl;
         }
+        totalPredictions++;
         cout << "----------------------------------------" << endl;
     }
+
+
+    cout << "Total Predictions: " << totalPredictions << endl;
+    cout << "Correct Predictions: " << correctPredictions << endl;
+    cout << "Incorrect Predictions: " << (totalPredictions - correctPredictions) << endl;
+    double accuracy = static_cast<double>(correctPredictions) / totalPredictions * 100.0;
+    cout << "Accuracy: " << accuracy << "%" << endl;
+
     return 0;
 }

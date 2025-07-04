@@ -1,19 +1,19 @@
 #include "process.h"
+#include <cfloat>
 
 vector<string> Process::splitCSV(const string& line) {
     vector<string> tokens;
     stringstream ss(line);
     string token;
-    
+
     while (getline(ss, token, ',')) {
         token.erase(0, token.find_first_not_of(" \t"));
         token.erase(token.find_last_not_of(" \t") + 1);
         tokens.push_back(token);
     }
-    
+
     return tokens;
 }
-
 bool Process::areAttributesEqual(const vector<AttributeValue>& a, const vector<AttributeValue>& b) {
     if (a.size() != b.size()) return false;
     for (size_t i = 0; i < a.size(); ++i) {
@@ -23,7 +23,6 @@ bool Process::areAttributesEqual(const vector<AttributeValue>& a, const vector<A
     }
     return true;
 }
-
 void Process::readDataFromFile() {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -43,7 +42,7 @@ void Process::readDataFromFile() {
 
     // read data lines
     while (getline(file, line)) {
-        if (line.empty()) continue; 
+        if (line.empty()) continue;
         vector<string> tokens = splitCSV(line);
         if (tokens.size() != headers.size()) {
             cerr << "Skipping line with incorrect number of columns: " << line << endl;
@@ -64,17 +63,16 @@ void Process::readDataFromFile() {
         data.label.name = tokens[tokens.size() - 1];
         allData.push_back(data);
     }
-    file.close();    
+    file.close();
 }
-
 void Process::collectAttributes() {
-    int attrIndex = 0; 
+    int attrIndex = 0;
     for (int i = 0; i < headers.size() - 1; ++i) {
         AttributeAllValues aav;
         aav.name = headers[i];
 
         for (auto d : allData) {
-            if (attrIndex < d.attributes.size()) { 
+            if (attrIndex < d.attributes.size()) {
                 string v = d.attributes[attrIndex].value;
                 if (find(aav.values.begin(), aav.values.end(), v) == aav.values.end()) {
                     aav.values.push_back(v);
@@ -84,14 +82,43 @@ void Process::collectAttributes() {
 
         attributes.push_back(aav);
         attrIndex++;
-    }    
+    }
+}
+void Process::readInitialDataFromFile() {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Could not open file: " << filename << endl;
+        return;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+        initial.push_back(line);
+    }
+    file.close();
+}
+void Process::writeInitialDataToFile() {
+    ofstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Could not open file for writing: " << filename << endl;
+        return;
+    }
+
+    for (const auto& line : initial) {
+        file << line << endl;
+    }
+    file.close();
 }
 
 Process::Process(string filename, double splitRatio) {
     this->filename = filename;
     this->splitRatio = splitRatio;
+    readInitialDataFromFile();
 }
-
+Process::~Process() {
+    writeInitialDataToFile();
+}
 void Process::trimFirstColumnFromFile() {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -104,9 +131,9 @@ void Process::trimFirstColumnFromFile() {
 
     // read all lines
     while (getline(file, line)) {
-        if (line.empty()) continue; 
+        if (line.empty()) continue;
         vector<string> tokens = splitCSV(line);
-        if (tokens.size() < 2) continue; // skip lines with less than 2 columns
+        if (tokens.size() < 2) continue; 
         lines.push_back(line);
     }
     file.close();
@@ -115,17 +142,15 @@ void Process::trimFirstColumnFromFile() {
     ofstream outFile(filename);
     for (const auto& l : lines) {
         vector<string> tokens = splitCSV(l);
-        for (size_t i = 1; i < tokens.size(); ++i) { // skip first column
+        for (size_t i = 1; i < tokens.size(); ++i) { 
             outFile << tokens[i];
             if (i < tokens.size() - 1) outFile << ",";
         }
         outFile << endl;
     }
 }
-
 void Process::addHeaderRowInFile() {
 }
-
 void Process::startProcessing() {
     // read data from file
     readDataFromFile();
@@ -157,16 +182,16 @@ void Process::startProcessing() {
         td.attributes = it->attributes;
         testData.push_back(td);
     }
-    
+
     cout << "Processing complete:" << endl;
     cout << "Total samples: " << allData.size() << endl;
     cout << "Training samples: " << trainingData.size() << endl;
     cout << "Test samples: " << testData.size() << endl;
     cout << "Attributes: " << attributes.size() << endl;
-    
+
     cout << "Attribute Information:" << endl;
     for (int i = 0; i < attributes.size(); ++i) {
-        cout << "Attribute " << i << ": " << attributes[i].name << endl;
+        cout << "Attribute " << i << ": " << attributes[i].name << ", Number of Possible Values: " << attributes[i].values.size() << endl;
         cout << "  Possible values: ";
         for (const auto& val : attributes[i].values) {
             cout << val << ", ";
@@ -175,12 +200,92 @@ void Process::startProcessing() {
     }
 }
 
+vector<AttributeAllValues> Process::getAttributeAllValues() {
+    return attributes;
+}
+vector<TrainingData> Process::getTrainingData() {
+    return trainingData;
+}
+vector<TestData> Process::getTestData() {
+    return testData;
+}
 Label Process::getLabelForTestData(TestData testData) {
-    for (const auto& data: allData) {
+    for (const auto& data : allData) {
         if (areAttributesEqual(data.attributes, testData.attributes)) {
             return data.label;
         }
     }
     Label defaultLabel;
     return defaultLabel;
+}
+void Process::discretizeNumericalColumn(int columnIndex, int numClasses) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Could not open file: " << filename << endl;
+        return;
+    }
+
+    vector<vector<string>> rows;
+    string line;
+
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+        vector<string> tokens = splitCSV(line);
+        if (tokens.size() <= columnIndex) {
+            cerr << "Line skipped due to insufficient columns: " << line << endl;
+            continue;
+        }
+        rows.push_back(tokens);
+    }
+    file.close();
+
+    double minVal = DBL_MAX;
+    double maxVal = -DBL_MAX;
+
+    for (size_t i = 1; i < rows.size(); ++i) {
+        try {
+            double val = stod(rows[i][columnIndex]);
+            minVal = min(minVal, val);
+            maxVal = max(maxVal, val);
+        } catch (...) {
+            cerr << "Skipping non-numeric value: " << rows[i][columnIndex] << endl;
+        }
+    }
+
+    if (minVal >= maxVal) {
+        cerr << "Invalid range for discretization. min: " << minVal << ", max: " << maxVal << endl;
+        return;
+    }
+
+    double interval = (maxVal - minVal) / numClasses;
+
+    // Replace values with class labels
+    for (size_t i = 1; i < rows.size(); ++i) {
+        try {
+            double val = stod(rows[i][columnIndex]);
+            int classIndex = static_cast<int>((val - minVal) / interval);
+            if (classIndex == numClasses) classIndex--; // edge case for max value
+            rows[i][columnIndex] = "Class" + to_string(classIndex + 1);
+        } catch (...) {
+            cerr << "Skipping non-numeric value during class assignment: " << rows[i][columnIndex] << endl;
+        }
+    }
+
+    // Write back to file
+    ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        cerr << "Could not open file for writing: " << filename << endl;
+        return;
+    }
+
+    for (const auto& tokens : rows) {
+        for (size_t i = 0; i < tokens.size(); ++i) {
+            outFile << tokens[i];
+            if (i < tokens.size() - 1) outFile << ",";
+        }
+        outFile << endl;
+    }
+    outFile.close();
+
+    cout << "Discretization complete for column " << columnIndex << " into " << numClasses << " classes." << endl;
 }

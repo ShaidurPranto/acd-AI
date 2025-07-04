@@ -15,6 +15,7 @@ private:
     string filename;
     double splitRatio;
 
+    vector<string> initial;
     vector<string> headers;
     vector<AttributeAllValues> attributes;
     vector<TrainingData> allData;
@@ -25,15 +26,19 @@ private:
     bool areAttributesEqual(const vector<AttributeValue>& a, const vector<AttributeValue>& b);
     void readDataFromFile();
     void collectAttributes();
+    void readInitialDataFromFile();
+    void writeInitialDataToFile();
 public:
     Process(string filename, double splitRatio);
+    ~Process();
     void trimFirstColumnFromFile();
     void addHeaderRowInFile();
     void startProcessing();
-    vector<AttributeAllValues> getAttributeAllValues() const { return attributes; }
-    vector<TrainingData> getTrainingData() const { return trainingData; }
-    vector<TestData> getTestData() const { return testData; }
+    vector<AttributeAllValues> getAttributeAllValues();
+    vector<TrainingData> getTrainingData();
+    vector<TestData> getTestData();
     Label getLabelForTestData(TestData testData);
+    void discretizeNumericalColumn(int columnIndex, int numClasses);
 };
 
 #endif
