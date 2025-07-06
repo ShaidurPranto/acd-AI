@@ -192,11 +192,11 @@ void Process::startProcessing() {
     cout << "Attribute Information:" << endl;
     for (int i = 0; i < attributes.size(); ++i) {
         cout << "Attribute " << i << ": " << attributes[i].name << ", Number of Possible Values: " << attributes[i].values.size() << endl;
-        cout << "  Possible values: ";
-        for (const auto& val : attributes[i].values) {
-            cout << val << ", ";
-        }
-        cout << endl;
+        // cout << "  Possible values: ";
+        // for (const auto& val : attributes[i].values) {
+        //     cout << val << ", ";
+        // }
+        // cout << endl;
     }
 }
 

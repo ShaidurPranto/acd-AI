@@ -6,7 +6,7 @@
 
 using namespace std;
 
-double Heuristic::entropy(vector<TrainingData> data) {
+double Heuristic::entropy(vector<TrainingData> &data) {
     if (data.empty()) return 0.0;
 
     map<Label, int> classCounts;
@@ -27,7 +27,7 @@ double Heuristic::entropy(vector<TrainingData> data) {
     return entropy;
 }
 
-vector<TrainingData> Heuristic::filterDataByAttributesValue(vector<TrainingData> data, AttributeValue attributeValue) {
+vector<TrainingData> Heuristic::filterDataByAttributesValue(vector<TrainingData> &data, AttributeValue attributeValue) {
     vector<TrainingData> filteredData;
     for (auto sample : data) {
         for (auto attr : sample.attributes) {
@@ -40,7 +40,7 @@ vector<TrainingData> Heuristic::filterDataByAttributesValue(vector<TrainingData>
     return filteredData;
 }
 
-double Heuristic::informationGain(vector<TrainingData> data, AttributeAllValues attribute) {
+double Heuristic::informationGain(vector<TrainingData> &data, AttributeAllValues &attribute) {
     double totalEntropy = entropy(data);
     int totalSamples = data.size();
 
@@ -53,7 +53,7 @@ double Heuristic::informationGain(vector<TrainingData> data, AttributeAllValues 
     return totalEntropy;
 }
 
-double Heuristic::informationGainRatio(vector<TrainingData> data, AttributeAllValues attribute) {
+double Heuristic::informationGainRatio(vector<TrainingData> &data, AttributeAllValues &attribute) {
     double intrinsicValue = 0.0;
     int totalSamples = data.size();
     for (auto value : attribute.values) {
@@ -67,7 +67,7 @@ double Heuristic::informationGainRatio(vector<TrainingData> data, AttributeAllVa
     return intrinsicValue == 0 ? 0 : informationGain(data, attribute) / intrinsicValue;
 }
 
-double Heuristic::normalizedWeightedInformationGain(vector<TrainingData> data, AttributeAllValues attribute) {
+double Heuristic::normalizedWeightedInformationGain(vector<TrainingData> &data, AttributeAllValues &attribute) {
     double informationGainValue = informationGain(data, attribute);
     int k = attribute.values.size();
     int sampleSize = data.size();
@@ -78,7 +78,7 @@ Heuristic::Heuristic(HeuristicType type = HeuristicType::IG) {
     this->type = type;
 }
 
-double Heuristic::evaluate(vector<TrainingData> data, AttributeAllValues attribute) {
+double Heuristic::evaluate(vector<TrainingData> &data, AttributeAllValues &attribute) {
     switch (type) {
     case HeuristicType::IG:
         return informationGain(data, attribute);

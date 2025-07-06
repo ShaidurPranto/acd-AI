@@ -16,7 +16,7 @@ void ID3::deleteTree(Node* node) {
         delete node;
     }
 }
-bool ID3::allSameLabel(vector<TrainingData> trainingData) {
+bool ID3::allSameLabel(vector<TrainingData> &trainingData) {
     if (trainingData.empty()) return true;
     Label firstLabel = trainingData[0].label;
     for (auto data : trainingData) {
@@ -26,7 +26,7 @@ bool ID3::allSameLabel(vector<TrainingData> trainingData) {
     }
     return true;
 }
-Label ID3::getCommonLabel(vector<TrainingData> trainingData) {
+Label ID3::getCommonLabel(vector<TrainingData> &trainingData) {
     map<Label, int> labelCount;
     for (auto data : trainingData) {
         labelCount[data.label]++;
@@ -41,7 +41,7 @@ Label ID3::getCommonLabel(vector<TrainingData> trainingData) {
     }
     return mostCommonLabel;
 }
-AttributeAllValues ID3::getBestAttribute(vector<TrainingData> trainingData, vector<AttributeAllValues> attributes, Heuristic heuristic) {
+AttributeAllValues ID3::getBestAttribute(vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic) {
     double bestScore = heuristic.evaluate(trainingData, attributes[0]);
     AttributeAllValues bestAttribute = attributes[0];
 
@@ -54,7 +54,7 @@ AttributeAllValues ID3::getBestAttribute(vector<TrainingData> trainingData, vect
     }
     return bestAttribute;
 }
-vector<TrainingData> ID3::filterDataByAttributeValue(vector<TrainingData> data, AttributeValue attributeValue) {
+vector<TrainingData> ID3::filterDataByAttributeValue(vector<TrainingData> &data, AttributeValue attributeValue) {
     vector<TrainingData> filteredData;
     for (auto sample : data) {
         for (auto attr : sample.attributes) {
@@ -66,7 +66,7 @@ vector<TrainingData> ID3::filterDataByAttributeValue(vector<TrainingData> data, 
     }
     return filteredData;
 }
-vector<AttributeAllValues> ID3::getRemainingAttributes(vector<AttributeAllValues> attributes, AttributeAllValues bestAttribute) {
+vector<AttributeAllValues> ID3::getRemainingAttributes(vector<AttributeAllValues> &attributes, AttributeAllValues &bestAttribute) {
     vector<AttributeAllValues> remainingAttributes;
     for (auto attr : attributes) {
         if (attr.name != bestAttribute.name) {
@@ -75,7 +75,7 @@ vector<AttributeAllValues> ID3::getRemainingAttributes(vector<AttributeAllValues
     }
     return remainingAttributes;
 }
-void ID3::buildTree(Node * parent,vector<TrainingData> trainingData, vector<AttributeAllValues> attributes, Heuristic heuristic, int depth, bool isDepth) {
+void ID3::buildTree(Node * parent,vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth, bool isDepth) {
     AttributeAllValues bestAttribute = getBestAttribute(trainingData, attributes, heuristic);
     vector<AttributeAllValues> remainingAttributes = getRemainingAttributes(attributes, bestAttribute);
     // cout << "Best attribute: " << bestAttribute.name << endl;
@@ -173,7 +173,7 @@ ID3::ID3() {
 ID3::~ID3() {
     deleteTree(root);
 }
-void ID3::train(vector<TrainingData> trainingData, vector<AttributeAllValues> attributes, Heuristic heuristic, int depth) {
+void ID3::train(vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth) {
     this->root = new Node();
     if(depth == 0) {
         buildTree(this->root,trainingData, attributes, heuristic, depth, false);

@@ -143,22 +143,22 @@ void trainAndTestDataset(string filename, double splitRatio, bool discretize = f
     }
 }
 
+
+// g++ -Ofast -march=native 2105177_main.cpp -o out
+
 int main()
 {
-    // discretize
-    // heuristic type
-    // depth
     string filename = "Datasets/adult.data";
     double splitRatio = 0.8;
-    bool discretize = true;
+    bool discretize = false;
 
-    HeuristicType heuristicType = HeuristicType::IGR;
+    HeuristicType heuristicType = HeuristicType::IG;
     int depth = 0; // 0 means no limit on depth
 
     bool printTestInfo = false;
-    int repeat = 3;
+    int repeat = 1;
     bool generateReport = true;
-    string reportFilename = "my_report.csv";
+    string reportFilename = "my_report";
 
     trainAndTestDataset(filename, splitRatio, discretize, heuristicType, depth, printTestInfo, repeat, generateReport, reportFilename);
 
