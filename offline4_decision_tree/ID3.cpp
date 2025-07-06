@@ -16,7 +16,6 @@ void ID3::deleteTree(Node* node) {
         delete node;
     }
 }
-
 bool ID3::allSameLabel(vector<TrainingData> trainingData) {
     if (trainingData.empty()) return true;
     Label firstLabel = trainingData[0].label;
@@ -27,7 +26,6 @@ bool ID3::allSameLabel(vector<TrainingData> trainingData) {
     }
     return true;
 }
-
 Label ID3::getCommonLabel(vector<TrainingData> trainingData) {
     map<Label, int> labelCount;
     for (auto data : trainingData) {
@@ -43,7 +41,6 @@ Label ID3::getCommonLabel(vector<TrainingData> trainingData) {
     }
     return mostCommonLabel;
 }
-
 AttributeAllValues ID3::getBestAttribute(vector<TrainingData> trainingData, vector<AttributeAllValues> attributes, Heuristic heuristic) {
     double bestScore = heuristic.evaluate(trainingData, attributes[0]);
     AttributeAllValues bestAttribute = attributes[0];
@@ -57,7 +54,6 @@ AttributeAllValues ID3::getBestAttribute(vector<TrainingData> trainingData, vect
     }
     return bestAttribute;
 }
-
 vector<TrainingData> ID3::filterDataByAttributeValue(vector<TrainingData> data, AttributeValue attributeValue) {
     vector<TrainingData> filteredData;
     for (auto sample : data) {
@@ -70,7 +66,6 @@ vector<TrainingData> ID3::filterDataByAttributeValue(vector<TrainingData> data, 
     }
     return filteredData;
 }
-
 vector<AttributeAllValues> ID3::getRemainingAttributes(vector<AttributeAllValues> attributes, AttributeAllValues bestAttribute) {
     vector<AttributeAllValues> remainingAttributes;
     for (auto attr : attributes) {
@@ -80,7 +75,6 @@ vector<AttributeAllValues> ID3::getRemainingAttributes(vector<AttributeAllValues
     }
     return remainingAttributes;
 }
-
 void ID3::buildTree(Node * parent,vector<TrainingData> trainingData, vector<AttributeAllValues> attributes, Heuristic heuristic, int depth, bool isDepth) {
     AttributeAllValues bestAttribute = getBestAttribute(trainingData, attributes, heuristic);
     vector<AttributeAllValues> remainingAttributes = getRemainingAttributes(attributes, bestAttribute);
@@ -117,7 +111,6 @@ void ID3::buildTree(Node * parent,vector<TrainingData> trainingData, vector<Attr
         }
     }
 }
-
 Label ID3::classifyHelper(Node* node, TestData testData) {
     if (node->children.empty()) {
         return {node->label}; 
@@ -132,7 +125,6 @@ Label ID3::classifyHelper(Node* node, TestData testData) {
     }
     return {}; 
 }
-
 void ID3::printTreeHelper(Node* node, string indent, bool isLast) {
     if (node == NULL) return;
 
@@ -155,18 +147,32 @@ void ID3::printTreeHelper(Node* node, string indent, bool isLast) {
         printTreeHelper(node->children[i], indent, i == node->children.size() - 1);
     }
 }
+int ID3::numberOfNodesHelper(Node* node) {
+    if (node == NULL) return 0;
+    int count = 1; 
+    for (auto child : node->children) {
+        count += numberOfNodesHelper(child);
+    }
+    return count;
+}
+int ID3::maximumDepthHelper(Node* node, int currentDepth) {
+    if (node == NULL) return currentDepth;
+    if (node->children.empty()) return currentDepth + 1;
 
-
+    int maxDepth = currentDepth + 1;
+    for (auto child : node->children) {
+        maxDepth = max(maxDepth, maximumDepthHelper(child, currentDepth + 1));
+    }
+    return maxDepth;
+}
 
 
 ID3::ID3() {
     root = NULL;
 }
-
 ID3::~ID3() {
     deleteTree(root);
 }
-
 void ID3::train(vector<TrainingData> trainingData, vector<AttributeAllValues> attributes, Heuristic heuristic, int depth) {
     this->root = new Node();
     if(depth == 0) {
@@ -175,14 +181,12 @@ void ID3::train(vector<TrainingData> trainingData, vector<AttributeAllValues> at
         buildTree(this->root,trainingData, attributes, heuristic, depth, true);
     }
 }
-
 Label ID3::classify(TestData testData) {
     if (root == NULL) {
         throw runtime_error("Model is not trained yet.");
     }
     return classifyHelper(root, testData);
 }
-
 void ID3::printTree() {
     if (root == NULL) {
         cout << "Tree is empty." << endl;
@@ -192,4 +196,10 @@ void ID3::printTree() {
     for (size_t i = 0; i < root->children.size(); ++i) {
         printTreeHelper(root->children[i], "", i == root->children.size() - 1);
     }
+}
+int ID3::numberOfNodes() {
+    return numberOfNodesHelper(root);
+}
+int ID3::maximumDepth() {
+    return maximumDepthHelper(root, 0);
 }

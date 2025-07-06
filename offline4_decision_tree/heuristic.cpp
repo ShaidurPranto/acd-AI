@@ -54,36 +54,24 @@ double Heuristic::informationGain(vector<TrainingData> data, AttributeAllValues 
 }
 
 double Heuristic::informationGainRatio(vector<TrainingData> data, AttributeAllValues attribute) {
-    double totalEntropy = entropy(data);
+    double intrinsicValue = 0.0;
     int totalSamples = data.size();
-    double splitInfo = 0.0;
-
     for (auto value : attribute.values) {
         AttributeValue attrValue{attribute.name, value};
         vector<TrainingData> filteredData = filterDataByAttributesValue(data, attrValue);
-        double subsetEntropy = entropy(filteredData);
-        if (subsetEntropy > 0) {
-            splitInfo -= ((double)filteredData.size() / totalSamples) * log2((double)filteredData.size() / totalSamples);
+        double subsetSize = (double)filteredData.size() / totalSamples;
+        if (subsetSize > 0) {
+            intrinsicValue = intrinsicValue - subsetSize * log2(subsetSize);
         }
-        totalEntropy -= ((double)filteredData.size() / totalSamples) * subsetEntropy;
     }
-
-    return splitInfo == 0 ? 0 : totalEntropy / splitInfo;
+    return intrinsicValue == 0 ? 0 : informationGain(data, attribute) / intrinsicValue;
 }
 
 double Heuristic::normalizedWeightedInformationGain(vector<TrainingData> data, AttributeAllValues attribute) {
-    double totalEntropy = entropy(data);
-    int totalSamples = data.size();
-    double weightedEntropy = 0.0;
-
-    for (auto value : attribute.values) {
-        AttributeValue attrValue{attribute.name, value};
-        vector<TrainingData> filteredData = filterDataByAttributesValue(data, attrValue);
-        double subsetEntropy = entropy(filteredData);
-        weightedEntropy += ((double)filteredData.size() / totalSamples) * subsetEntropy;
-    }
-
-    return totalEntropy - weightedEntropy;
+    double informationGainValue = informationGain(data, attribute);
+    int k = attribute.values.size();
+    int sampleSize = data.size();
+    return (informationGainValue / log2(k+1)) * (1 - (k - 1) / sampleSize);
 }
 
 Heuristic::Heuristic(HeuristicType type = HeuristicType::IG) {
