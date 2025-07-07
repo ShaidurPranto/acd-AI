@@ -1,9 +1,9 @@
 #include<iostream>
 #include <map>
 #include <cmath>
-#include "util.h"
-#include "heuristic.h"
-#include "ID3.h"
+#include "2105177_util.h"
+#include "2105177_heuristic.h"
+#include "2105177_ID3.h"
 
 using namespace std;
 
@@ -45,7 +45,7 @@ AttributeAllValues ID3::getBestAttribute(vector<TrainingData> &trainingData, vec
     double bestScore = heuristic.evaluate(trainingData, attributes[0]);
     AttributeAllValues bestAttribute = attributes[0];
 
-    for (auto attribute : attributes) {
+    for (auto &attribute : attributes) {
         double score = heuristic.evaluate(trainingData, attribute);
         if (score > bestScore) {
             bestScore = score;
@@ -68,19 +68,23 @@ vector<TrainingData> ID3::filterDataByAttributeValue(vector<TrainingData> &data,
 }
 vector<AttributeAllValues> ID3::getRemainingAttributes(vector<AttributeAllValues> &attributes, AttributeAllValues &bestAttribute) {
     vector<AttributeAllValues> remainingAttributes;
-    for (auto attr : attributes) {
+    for (auto& attr : attributes) {
         if (attr.name != bestAttribute.name) {
             remainingAttributes.push_back(attr);
         }
     }
     return remainingAttributes;
 }
-void ID3::buildTree(Node * parent,vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth, bool isDepth) {
+void ID3::buildTree(Node * parent,vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth, long long int &totalNodes, int depthLimit, bool isDepth) {
     AttributeAllValues bestAttribute = getBestAttribute(trainingData, attributes, heuristic);
     vector<AttributeAllValues> remainingAttributes = getRemainingAttributes(attributes, bestAttribute);
     // cout << "Best attribute: " << bestAttribute.name << endl;
 
-    for (auto value : bestAttribute.values) {
+    // cout << "At depth " << depth << ", best attribute: " << bestAttribute.name << " with possible values: " << bestAttribute.values.size() << endl;
+    totalNodes = totalNodes + bestAttribute.values.size();
+    // cout << "Total nodes so far: " << totalNodes << endl;
+
+    for (auto& value : bestAttribute.values) {
         Node* childNode = new Node();
         childNode->parent = parent;
         parent->children.push_back(childNode);
@@ -103,11 +107,11 @@ void ID3::buildTree(Node * parent,vector<TrainingData> &trainingData, vector<Att
         } else if (remainingAttributes.empty()) {
             childNode->label = getCommonLabel(filteredData);
             // cout << "LEAF NODE: no more attributes left, assigning common label: " << childNode->label.name << endl;
-        } else if (isDepth && depth <= 1) {
+        } else if (isDepth && depthLimit <= 1) {
             childNode->label = getCommonLabel(filteredData);
             // cout << "LEAF NODE: depth limit reached, assigning common label: " << childNode->label.name << endl;
         } else {
-            buildTree(childNode,filteredData,remainingAttributes,heuristic,depth - 1,isDepth);
+            buildTree(childNode,filteredData,remainingAttributes,heuristic,depth + 1,totalNodes,depthLimit - 1,isDepth);
         }
     }
 }
@@ -173,12 +177,13 @@ ID3::ID3() {
 ID3::~ID3() {
     deleteTree(root);
 }
-void ID3::train(vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth) {
+void ID3::train(vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depthLimit) {
     this->root = new Node();
-    if(depth == 0) {
-        buildTree(this->root,trainingData, attributes, heuristic, depth, false);
+    long long int totalNodes = 0;
+    if(depthLimit == 0) {
+        buildTree(this->root,trainingData, attributes, heuristic, 0 , totalNodes, depthLimit, false);
     } else {
-        buildTree(this->root,trainingData, attributes, heuristic, depth, true);
+        buildTree(this->root,trainingData, attributes, heuristic, 0, totalNodes, depthLimit, true);
     }
 }
 Label ID3::classify(TestData testData) {

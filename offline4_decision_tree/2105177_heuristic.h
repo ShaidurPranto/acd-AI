@@ -2,7 +2,7 @@
 #define HEURISTIC_H
 
 #include <iostream>
-#include "util.h"
+#include "2105177_util.h"
 
 enum class HeuristicType {
     IG,
@@ -22,7 +22,6 @@ public:
     Heuristic(HeuristicType type);
     double evaluate(vector<TrainingData> &data, AttributeAllValues &attribute);
 };
-
 
 
 #endif

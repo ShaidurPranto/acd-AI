@@ -2,8 +2,8 @@
 #define ID3_H
 
 #include<iostream>
-#include "util.h"
-#include "heuristic.h"
+#include "2105177_util.h"
+#include "2105177_heuristic.h"
 
 using namespace std;
 
@@ -17,7 +17,7 @@ private:
     AttributeAllValues getBestAttribute(vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic);
     vector<TrainingData> filterDataByAttributeValue(vector<TrainingData> &data, AttributeValue attributeValue);
     vector<AttributeAllValues> getRemainingAttributes(vector<AttributeAllValues> &attributes, AttributeAllValues &bestAttribute);
-    void buildTree(Node * parent,vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth, bool isDepth = false);
+    void buildTree(Node * parent,vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth, long long int &totalNodes, int depthLimit, bool isDepth);
     Label classifyHelper(Node* node, TestData testData);
     void printTreeHelper(Node* node, string indent, bool isLast);
     int numberOfNodesHelper(Node* node);
@@ -25,7 +25,7 @@ private:
 public:
     ID3();
     ~ID3();
-    void train(vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depth);
+    void train(vector<TrainingData> &trainingData, vector<AttributeAllValues> &attributes, Heuristic &heuristic, int depthLimit);
     Label classify(TestData testData);
     void printTree();
     int numberOfNodes();

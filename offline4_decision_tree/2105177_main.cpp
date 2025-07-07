@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <cctype>
 #include <fstream>
-#include "process.h"
-#include "ID3.h"
-#include "heuristic.h"
+#include "2105177_process.h"
+#include "2105177_ID3.h"
+#include "2105177_heuristic.h"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ void trainAndTestDataset(string filename, double splitRatio, bool discretize = f
 
     int count = 0;
     while (repeat--) {
-        cout << "Starting iteration " << ++count << " for dataset: " << filename << endl;
+        cout << "Starting iteration " << ++count << " for dataset: " << filename << endl << endl;;
 
         cout << "Loading dataset" << endl;
         Process process(filename, splitRatio);
@@ -68,7 +68,7 @@ void trainAndTestDataset(string filename, double splitRatio, bool discretize = f
         vector<AttributeAllValues> attributes = process.getAttributeAllValues();
         vector<TrainingData> trainingData = process.getTrainingData();
         vector<TestData> testData = process.getTestData();
-        cout << "Dataset loaded successfully." << endl;
+        cout << endl;
 
         cout << "Training Decision Tree." << endl;
         Heuristic heuristic(heuristicType); 
@@ -76,7 +76,7 @@ void trainAndTestDataset(string filename, double splitRatio, bool discretize = f
         id3.train(trainingData, attributes, heuristic, depth);
         cout << "Training completed." << endl;
 
-        id3.printTree();
+        // id3.printTree();
         cout << endl;
         cout << "Number of Nodes in the Tree: " << id3.numberOfNodes() << endl;
         cout << "Maximum Depth of the Tree: " << id3.maximumDepth() << endl;
@@ -142,22 +142,36 @@ void trainAndTestDataset(string filename, double splitRatio, bool discretize = f
         reportFile.close();
     }
 }
+HeuristicType getHeuristicTypeFromString(const string& str) {
+    if (str == "IG" || str == "ig") return HeuristicType::IG;
+    else if (str == "IGR" || str == "igr") return HeuristicType::IGR;
+    else if (str == "NWIG" || str == "nwig") return HeuristicType::NWIG;
+    else {
+        cerr << "Invalid heuristic type. Defaulting to IG." << endl;
+        return HeuristicType::IG;
+    }
+}
 
+// g++ 2105177_main.cpp 2105177_process.cpp 2105177_heuristic.cpp 2105177_ID3.cpp -o out
+// g++ -Ofast -march=native 2105177_main.cpp 2105177_process.cpp 2105177_heuristic.cpp 2105177_ID3.cpp -o out
+// ./out IG 3
 
-// g++ -Ofast -march=native 2105177_main.cpp -o out
-
-int main()
+int main(int argc, char* argv[])
 {
-    string filename = "Datasets/adult.data";
+    if(argc < 3) {
+        cout << "Usage: " << argv[0] << " ./decision_tree <criterion> <maxDepth>" << endl;
+        return 1;
+    }
+    string filename = "Datasets/Iris.csv"; 
     double splitRatio = 0.8;
     bool discretize = false;
 
-    HeuristicType heuristicType = HeuristicType::IG;
-    int depth = 0; // 0 means no limit on depth
+    HeuristicType heuristicType = getHeuristicTypeFromString(argv[1]);
+    int depth = atoi(argv[2]);
 
     bool printTestInfo = false;
     int repeat = 1;
-    bool generateReport = true;
+    bool generateReport = false;
     string reportFilename = "my_report";
 
     trainAndTestDataset(filename, splitRatio, discretize, heuristicType, depth, printTestInfo, repeat, generateReport, reportFilename);

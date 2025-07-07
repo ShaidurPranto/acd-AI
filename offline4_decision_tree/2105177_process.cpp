@@ -1,4 +1,4 @@
-#include "process.h"
+#include "2105177_process.h"
 #include <cfloat>
 
 vector<string> Process::splitCSV(const string& line) {
@@ -191,7 +191,7 @@ void Process::startProcessing() {
 
     cout << "Attribute Information:" << endl;
     for (int i = 0; i < attributes.size(); ++i) {
-        cout << "Attribute " << i << ": " << attributes[i].name << ", Number of Possible Values: " << attributes[i].values.size() << endl;
+        cout << "Attribute " << i << ": " << attributes[i].name << " . Number of Possible Values: " << attributes[i].values.size() << endl;
         // cout << "  Possible values: ";
         // for (const auto& val : attributes[i].values) {
         //     cout << val << ", ";
@@ -259,19 +259,19 @@ void Process::discretizeNumericalColumn(int columnIndex, int numClasses) {
 
     double interval = (maxVal - minVal) / numClasses;
 
-    // Replace values with class labels
+    // replace values with class labels
     for (size_t i = 1; i < rows.size(); ++i) {
         try {
             double val = stod(rows[i][columnIndex]);
             int classIndex = static_cast<int>((val - minVal) / interval);
-            if (classIndex == numClasses) classIndex--; // edge case for max value
+            if (classIndex == numClasses) classIndex--;
             rows[i][columnIndex] = "Class" + to_string(classIndex + 1);
         } catch (...) {
             cerr << "Skipping non-numeric value during class assignment: " << rows[i][columnIndex] << endl;
         }
     }
 
-    // Write back to file
+    // write back to file
     ofstream outFile(filename);
     if (!outFile.is_open()) {
         cerr << "Could not open file for writing: " << filename << endl;
